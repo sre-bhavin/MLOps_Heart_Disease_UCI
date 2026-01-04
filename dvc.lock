@@ -1,0 +1,94 @@
+schema: '2.0'
+stages:
+  ingest:
+    cmd: python src/ingestion.py
+    deps:
+    - path: src/ingestion.py
+      hash: md5
+      md5: 04b6a52243765e8149cc75765fe00920
+      size: 2210
+    outs:
+    - path: data/processed/heart_cleaned.csv
+      hash: md5
+      md5: 34e0685f5207b04157df0dd11e3e64fe
+      size: 18553
+    - path: data/raw/heart_raw.csv
+      hash: md5
+      md5: 6aeb6256b493b06f9eca8cc2171240df
+      size: 18535
+  visualize:
+    cmd: python src/eda.py
+    deps:
+    - path: data/processed/heart_cleaned.csv
+      hash: md5
+      md5: 34e0685f5207b04157df0dd11e3e64fe
+      size: 18553
+    - path: src/eda.py
+      hash: md5
+      md5: c53d2815888861a790fa98d3b8f385e1
+      size: 4135
+    outs:
+    - path: reports/class_distribution.png
+      hash: md5
+      md5: 9f53576b9b28fcdcf321211db73f7926
+      size: 126481
+    - path: reports/correlation_heatmap.png
+      hash: md5
+      md5: 3fc6ffd221b733751482849dec583445
+      size: 398521
+    - path: reports/data_profile.json
+      hash: md5
+      md5: 1c4f6e40a0096564fc22de28dde7849f
+      size: 1618
+    - path: reports/numerical_distributions.png
+      hash: md5
+      md5: e02912b7d15e3116c29ef344ad9c3225
+      size: 402688
+  transform:
+    cmd: python src/transformation.py
+    deps:
+    - path: data/processed/heart_cleaned.csv
+      hash: md5
+      md5: 34e0685f5207b04157df0dd11e3e64fe
+      size: 18553
+    - path: src/transformation.py
+      hash: md5
+      md5: 3bb427e132c52ce4870646e912b07d5c
+      size: 3328
+    outs:
+    - path: data/processed/heart_transformed.csv
+      hash: md5
+      md5: 3cd745cda161929843f4a3837dd16f5d
+      size: 58408
+    - path: models/preprocessor.pkl
+      hash: md5
+      md5: 7b22eaf4f421dca294ae1f132af7d107
+      size: 3460
+  test:
+    cmd: pytest
+    deps:
+    - path: data/processed/heart_transformed.csv
+      hash: md5
+      md5: 3cd745cda161929843f4a3837dd16f5d
+      size: 58408
+    - path: models/preprocessor.pkl
+      hash: md5
+      md5: 7b22eaf4f421dca294ae1f132af7d107
+      size: 3460
+    - path: src/eda.py
+      hash: md5
+      md5: c53d2815888861a790fa98d3b8f385e1
+      size: 4135
+    - path: src/ingestion.py
+      hash: md5
+      md5: 04b6a52243765e8149cc75765fe00920
+      size: 2210
+    - path: src/transformation.py
+      hash: md5
+      md5: 3bb427e132c52ce4870646e912b07d5c
+      size: 3328
+    - path: tests/
+      hash: md5
+      md5: 6162913a16f756987604778cc9ad6e3e.dir
+      size: 14112
+      nfiles: 11

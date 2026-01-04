@@ -5,3 +5,13 @@ logs/
 mlruns/
 mlops_pipeline_project.egg-info/
 .pytest_cache
+
+
+# Ignore the actual data and models (DVC handles these)
+data/
+models/
+reports/
+
+# Ignore the DVC local cache (where the actual big files live)
+.dvc/cache/
+.dvc/tmp/

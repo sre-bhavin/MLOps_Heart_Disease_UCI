@@ -1,0 +1,38 @@
+stages:
+  ingest:
+    cmd: python src/ingestion.py
+    deps:
+      - src/ingestion.py
+    outs:
+      - data/raw/heart_raw.csv
+      - data/processed/heart_cleaned.csv
+
+  visualize:
+    cmd: python src/eda.py
+    deps:
+      - data/processed/heart_cleaned.csv
+      - src/eda.py
+    outs:
+      - reports/class_distribution.png
+      - reports/correlation_heatmap.png
+      - reports/numerical_distributions.png
+      - reports/data_profile.json
+
+  transform:
+    cmd: python src/transformation.py
+    deps:
+      - data/processed/heart_cleaned.csv
+      - src/transformation.py
+    outs:
+      - data/processed/heart_transformed.csv
+      - models/preprocessor.pkl
+
+  test:
+    cmd: pytest
+    deps:
+      - src/ingestion.py
+      - src/eda.py
+      - src/transformation.py
+      - data/processed/heart_transformed.csv
+      - models/preprocessor.pkl
+      - tests/

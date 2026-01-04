@@ -10,7 +10,7 @@ from src.exception import CustomException
 
 class DataIngestion:
     def __init__(self):
-        self.raw_data_path = Path("data/raw/heart.csv")
+        self.raw_data_path = Path("data/raw/heart_raw.csv")
         self.processed_data_path = Path("data/processed/heart_cleaned.csv")
         
     def initiate_data_ingestion(self):
@@ -29,6 +29,11 @@ class DataIngestion:
             df = pd.read_csv(StringIO(response.text), names=column_names, na_values='?')
             logger.info("Dataset downloaded successfully from UCI repository")
 
+            # Save Processed file
+            os.makedirs(self.raw_data_path.parent, exist_ok=True)
+            df.to_csv(self.raw_data_path, index=False)
+            logger.info(f"Downloaded Raw data saved to {self.raw_data_path}")
+
             # Basic Cleaning
             df['target'] = df['target'].apply(lambda x: 1 if x > 0 else 0)
             
@@ -38,12 +43,11 @@ class DataIngestion:
                     val = df[col].median() if df[col].dtype != 'O' else df[col].mode()[0]
                     df[col] = df[col].fillna(val)
             
-            # Save Raw and Processed
-            os.makedirs(self.raw_data_path.parent, exist_ok=True)
+            # Save Processed file
             os.makedirs(self.processed_data_path.parent, exist_ok=True)
             
             df.to_csv(self.processed_data_path, index=False)
-            logger.info(f"Ingested data saved to {self.processed_data_path}")
+            logger.info(f"Processed data saved to {self.processed_data_path}")
 
             return self.processed_data_path
 
