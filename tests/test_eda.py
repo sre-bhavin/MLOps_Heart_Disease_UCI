@@ -1,4 +1,5 @@
 import os
+import pytest
 from src.eda import EDAAutomator
 
 def test_eda_report_generation():
