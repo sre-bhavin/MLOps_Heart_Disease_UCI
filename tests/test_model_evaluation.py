@@ -3,6 +3,17 @@ from src.model_evaluation import ModelEvaluator
 from pathlib import Path
 import mlflow
 
+import pytest
+from mlflow.tracking import MlflowClient
+
+@pytest.fixture(scope="session", autouse=True)
+def ensure_experiment():
+    client = MlflowClient()
+    name = "Heart_Disease_Classification"
+    if client.get_experiment_by_name(name) is None:
+        client.create_experiment(name)
+
+
 def test_mlflow_experiment_exists():
     """Check if the evaluation script can find the MLflow experiment."""
     evaluator = ModelEvaluator()
