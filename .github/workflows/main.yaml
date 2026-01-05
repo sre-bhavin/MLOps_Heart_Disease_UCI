@@ -48,11 +48,11 @@ jobs:
         with:
           version: '3.0.0'
 
-      - name: DVC Pull Data
-        run: dvc pull || true
+      - name: DVC Run
+        run: dvc repro
 
-      - name: Train Model
-        run: python src/model_trainer.py
+      # - name: Train Model
+      #   run: python src/model_trainer.py
 
       - name: Upload Trained Model Artifacts
         uses: actions/upload-artifact@v4
