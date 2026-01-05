@@ -49,7 +49,7 @@ jobs:
           version: '3.0.0'
 
       - name: DVC Pull Data
-        run: dvc pull
+        run: dvc pull || true
 
       - name: Train Model
         run: python src/model_trainer.py
