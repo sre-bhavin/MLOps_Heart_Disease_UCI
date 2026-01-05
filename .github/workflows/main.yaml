@@ -43,6 +43,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Setup DVC
+        uses: iterative/setup-dvc@v1 
+        with:
+          version: '3.0.0'
+
       - name: DVC Pull Data
         run: dvc pull
 
