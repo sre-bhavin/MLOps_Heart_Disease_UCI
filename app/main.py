@@ -5,8 +5,27 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 
+import logging
+from datetime import datetime
+from prometheus_fastapi_instrumentator import Instrumentator
+
+# Setup logging configuration
+logging.basicConfig(
+    filename='api_activity.log',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+
 # Initialize FastAPI
 app = FastAPI(title="Heart Disease Prediction API")
+
+# start tracking metrics
+instrumentator = Instrumentator()
+instrumentator.instrument(app).expose(app)
+
+@app.on_event("startup")
+async def expose_metrics():
+    instrumentator.expose(app)
 
 # Path to artifacts
 MODEL_PATH = Path("models/best_model.pkl")
@@ -53,10 +72,14 @@ def predict(data: PatientData):
         probability = model.predict_proba(transformed_data)[0]
         confidence = float(np.max(probability))
 
+        # Log the activity
+        logging.info(f"Request: {data.model_dump()} | Prediction: {prediction} | Confidence: {confidence}")
+
         return {
             "prediction": int(prediction),
             "status": "Positive" if prediction == 1 else "Negative",
             "confidence": round(confidence, 4)
         }
     except Exception as e:
+        logging.error(f"Prediction failed: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))

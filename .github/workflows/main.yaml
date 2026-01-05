@@ -1,0 +1,75 @@
+name: MLOps Local CI/CD
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  # --- STAGE 1: LINT & UNIT TEST ---
+  quality-check:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        run: pip install flake8 pytest
+
+      - name: Lint with flake8
+        run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: Run Unit Tests
+        run: pytest tests/
+        
+      - name: Save Test Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: .pytest_cache/
+
+  # --- STAGE 2: MODEL TRAINING ---
+  train-model:
+    needs: quality-check
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: DVC Pull Data
+        run: dvc pull
+
+      - name: Train Model
+        run: python src/model_trainer.py
+
+      - name: Upload Trained Model Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-artifacts
+          path: |
+            models/best_model.pkl
+            models/preprocessor.pkl
+            models/*.png
+
+  # --- STAGE 3: BUILD & DEPLOY TO K8S ---
+  deploy-local:
+    needs: train-model
+    runs-on: self-hosted
+    steps:
+      - name: Build Docker Image
+        run: docker build -t heart-disease-api:latest .
+
+      - name: Apply Kubernetes Manifests
+        run: |
+          kubectl apply -f deployment.yaml
+          kubectl apply -f monitoring.yaml
+
+      - name: Verify Deployment
+        run: |
+          kubectl rollout status deployment/heart-disease-api-deployment
+          kubectl get pods

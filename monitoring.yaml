@@ -1,0 +1,159 @@
+# 1. Prometheus Configuration (Scraping Rules)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 5s
+    scrape_configs:
+      - job_name: 'heart-disease-api'
+        static_configs:
+          - targets: ['heart-disease-service:80']
+
+---
+# 2. Grafana Datasource (Auto-connect to Prometheus)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+data:
+  datasource.yaml: |-
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      url: http://prometheus-service:9090
+      isDefault: true
+
+---
+# 3. Grafana Dashboard Provider
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provider
+data:
+  provider.yaml: |-
+    apiVersion: 1
+    providers:
+    - name: 'Model Monitoring'
+      folder: 'MLOps'
+      type: file
+      options:
+        path: /var/lib/grafana/dashboards
+
+---
+# 4. Grafana Dashboard JSON (The actual graph design)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ml-model-dashboard
+data:
+  heart-disease-dashboard.json: |-
+    {
+      "title": "Heart Disease Model Health",
+      "panels": [
+        {
+          "title": "Requests per Second",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "targets": [{"expr": "rate(http_requests_total[1m])"}]
+        },
+        {
+          "title": "Average Latency (ms)",
+          "type": "gauge",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+          "targets": [{"expr": "rate(http_request_duration_seconds_sum[1m]) / rate(http_request_duration_seconds_count[1m]) * 1000"}]
+        }
+      ]
+    }
+
+---
+# 5. Prometheus Deployment & Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+      - name: prometheus
+        image: prom/prometheus:latest
+        args: ["--config.file=/etc/prometheus/prometheus.yml"]
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/prometheus
+      volumes:
+      - name: config-volume
+        configMap:
+          name: prometheus-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-service
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 9090
+  selector:
+    app: prometheus
+
+---
+# 6. Grafana Deployment & Service (With mounted ConfigMaps)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+      - name: grafana
+        image: grafana/grafana:latest
+        ports:
+        - containerPort: 3000
+        volumeMounts:
+        - name: ds-volume
+          mountPath: /etc/grafana/provisioning/datasources
+        - name: provider-volume
+          mountPath: /etc/grafana/provisioning/dashboards
+        - name: dashboard-volume
+          mountPath: /var/lib/grafana/dashboards
+      volumes:
+      - name: ds-volume
+        configMap:
+          name: grafana-datasources
+      - name: provider-volume
+        configMap:
+          name: grafana-dashboard-provider
+      - name: dashboard-volume
+        configMap:
+          name: ml-model-dashboard
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-service
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 3000
+  selector:
+    app: grafana
