@@ -33,6 +33,26 @@ stages:
       - src/ingestion.py
       - src/eda.py
       - src/transformation.py
+      - src/model_trainer.py
+      - src/model_evaluation.py
       - data/processed/heart_transformed.csv
       - models/preprocessor.pkl
       - tests/
+  
+  train:
+    cmd: python src/model_trainer.py
+    deps:
+      - data/processed/heart_transformed.csv
+      - src/model_trainer.py
+    outs:
+      - models/Logistic_Regression_cm.png
+      - models/Random_Forest_cm.png
+
+  evaluate:
+    cmd: python src/model_evaluation.py
+    deps:
+      - src/model_evaluation.py
+      - models/Logistic_Regression_cm.png
+      - models/Random_Forest_cm.png
+    outs:
+      - models/best_model.pkl

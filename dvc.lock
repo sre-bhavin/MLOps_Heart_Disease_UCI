@@ -92,3 +92,43 @@ stages:
       md5: 6162913a16f756987604778cc9ad6e3e.dir
       size: 14112
       nfiles: 11
+  train:
+    cmd: python src/model_trainer.py
+    deps:
+    - path: data/processed/heart_transformed.csv
+      hash: md5
+      md5: 3cd745cda161929843f4a3837dd16f5d
+      size: 58408
+    - path: src/model_trainer.py
+      hash: md5
+      md5: e05278d08c9fede7af2b792954e43ec1
+      size: 4061
+    outs:
+    - path: models/Logistic_Regression_cm.png
+      hash: md5
+      md5: ffe6462770eb97dcdd68465360f9740a
+      size: 15629
+    - path: models/Random_Forest_cm.png
+      hash: md5
+      md5: e0a6dc29f8bdada373269ad1ff88b505
+      size: 12229
+  evaluate:
+    cmd: python src/model_evaluation.py
+    deps:
+    - path: models/Logistic_Regression_cm.png
+      hash: md5
+      md5: ffe6462770eb97dcdd68465360f9740a
+      size: 15629
+    - path: models/Random_Forest_cm.png
+      hash: md5
+      md5: e0a6dc29f8bdada373269ad1ff88b505
+      size: 12229
+    - path: src/model_evaluation.py
+      hash: md5
+      md5: 963ca6eb6fe1784753d891f654662185
+      size: 3191
+    outs:
+    - path: models/best_model.pkl
+      hash: md5
+      md5: 840fd17feb9341d259ff5d8b22ba9449
+      size: 379871
