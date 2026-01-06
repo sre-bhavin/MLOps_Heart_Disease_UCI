@@ -15,7 +15,7 @@ This project implements a production-ready machine learning pipeline for predict
 
 1. **Clone the Repository:**
 ```bash
-git clone <your-repo-link>
+git clone https://github.com/sre-bhavin/MLOps_Heart_Disease_UCI
 cd MLOps_Heart_Disease_UCI
 
 ```
