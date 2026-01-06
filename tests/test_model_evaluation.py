@@ -81,6 +81,6 @@ def test_mlflow_experiment_exists():
     
 #     # Trigger evaluation
 #     evaluator.evaluate_and_register()
-    
-    assert dest_path.exists()
-    assert dest_path.stat().st_size > 0  # Check if file is not empty
+
+#     assert dest_path.exists()
+#     assert dest_path.stat().st_size > 0  # Check if file is not empty
