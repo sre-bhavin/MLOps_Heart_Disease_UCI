@@ -3,6 +3,7 @@ name: MLOps Local CI/CD
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   # --- STAGE 1: LINT & UNIT TEST ---
