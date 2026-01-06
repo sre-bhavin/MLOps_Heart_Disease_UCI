@@ -11,7 +11,7 @@ This project implements a production-ready machine learning pipeline for predict
 * **Environment:** Ubuntu WSL2 (recommended) or Linux.
 * **Tools:** Docker Desktop (with Kubernetes enabled), Python 3.9+, DVC.
 
-### Installation Steps
+### Installation Steps Manually
 
 1. **Clone the Repository:**
 ```bash
@@ -67,7 +67,53 @@ curl --location --request POST 'http://localhost/predict' \
 7. After creating traffic check monitoring dashboard in Grafana:  [http://localhost:3000](http://localhost:3000)
 
 ---
+### Deployment from Github Action (CI/CD)
 
+1. Clone Repo
+
+2. Setup Local Self-Hosted Runner
+
+Since we are using Ubuntu WSL2 as our environment, follow these steps to link your local machine as a worker for GitHub.
+
+* Register the Runner on GitHub
+
+    Navigate to your GitHub Repository.
+
+    Go to Settings > Actions > Runners.
+
+    Click the New self-hosted runner button.
+
+    Select Linux as the OS and x64 as the Architecture.
+
+* Install on WSL2
+
+Open your Ubuntu terminal and run the commands provided by GitHub (Example below):
+```bash
+# Create a dedicated runner directory
+mkdir actions-runner && cd actions-runner
+
+# Download the runner package (Verify the version on GitHub)
+curl -o actions-runner-linux-x64-X.X.X.tar.gz -L https://github.com/actions/runner/releases/download/vX.X.X/actions-runner-linux-x64-X.X.X.tar.gz
+
+# Extract the installer
+tar xzf ./actions-runner-linux-x64-X.X.X.tar.gz
+
+# Configure the runner (Paste the --url and --token from GitHub)
+./config.sh --url https://github.com/your-repo --token YOUR_TOKEN_HERE
+
+# Start the runner
+./run.sh
+```
+
+    Note: When configured, you will see a "Listening for Jobs" message. Keep this terminal open!
+
+3. Trigger the Workflow from the UI
+
+To run the CI/CD pipeline without pushing a code change, we have used the workflow_dispatch event.
+
+Go to github action in repo and click Run.
+
+---
 ## 📊 EDA & Modelling Choices
 
 ### Exploratory Data Analysis (EDA)
