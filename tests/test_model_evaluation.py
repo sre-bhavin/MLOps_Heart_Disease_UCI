@@ -13,39 +13,39 @@ def ensure_experiment():
     if client.get_experiment_by_name(name) is None:
         client.create_experiment(name)
 
-@pytest.fixture(scope="session", autouse=True)
-def ensure_model_version():
-    client = MlflowClient()
-    reg_name = "heart-disease-model"
+# @pytest.fixture(scope="session", autouse=True)
+# def ensure_model_version():
+#     client = MlflowClient()
+#     reg_name = "heart-disease-model"
 
-    # Create model if missing
-    try:
-        client.get_registered_model(reg_name)
-    except Exception:
-        client.create_registered_model(reg_name)
+#     # Create model if missing
+#     try:
+#         client.get_registered_model(reg_name)
+#     except Exception:
+#         client.create_registered_model(reg_name)
 
-    # Create a model version if none exist
-    versions = client.search_model_versions(f"name='{reg_name}'")
-    if not versions:
-        # Log a dummy artifact to register
-        with mlflow.start_run():
-            mlflow.log_param("init", True)
-            mlflow.log_metric("accuracy", 0.80)
-            mlflow.log_artifact("README.md")  # ensure some artifact exists
-            run_id = mlflow.active_run().info.run_id
-        client.create_model_version(
-            name=reg_name,
-            source=f"mlruns/{mlflow.active_run().info.experiment_id}/{run_id}/artifacts",
-            run_id=run_id
-        )
+#     # Create a model version if none exist
+#     versions = client.search_model_versions(f"name='{reg_name}'")
+#     if not versions:
+#         # Log a dummy artifact to register
+#         with mlflow.start_run():
+#             mlflow.log_param("init", True)
+#             mlflow.log_metric("accuracy", 0.80)
+#             mlflow.log_artifact("README.md")  # ensure some artifact exists
+#             run_id = mlflow.active_run().info.run_id
+#         client.create_model_version(
+#             name=reg_name,
+#             source=f"mlruns/{mlflow.active_run().info.experiment_id}/{run_id}/artifacts",
+#             run_id=run_id
+#         )
 
-    # Transition the latest version to Staging
-    latest_version = client.search_model_versions(f"name='{reg_name}'")[0]
-    client.transition_model_version_stage(
-        name=reg_name,
-        version=latest_version.version,
-        stage="Staging"
-    )
+#     # Transition the latest version to Staging
+#     latest_version = client.search_model_versions(f"name='{reg_name}'")[0]
+#     client.transition_model_version_stage(
+#         name=reg_name,
+#         version=latest_version.version,
+#         stage="Staging"
+#     )
 
 
 
