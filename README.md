@@ -47,8 +47,24 @@ kubectl apply -f deployment.yaml
 kubectl apply -f monitoring.yaml
 
 ```
+5. Check deployment status
 
+```batch
+kubectl get all
+```
 
+6. Call Predict API
+```batch
+curl --location --request POST 'http://localhost/predict' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "age": 83, "sex": 1, "cp": 3, "trestbps": 145, "chol": 433,
+  "fbs": 1, "restecg": 0, "thalach": 150, "exang": 0,
+  "oldpeak": 2.3, "slope": 0, "ca": 0, "thal": 1
+}'
+```
+
+7. After creating traffic check monitoring dashboard in Grafana:  [http://localhost:3000](http://localhost:3000)
 
 ---
 
